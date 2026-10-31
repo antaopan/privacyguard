@@ -1,5 +1,9 @@
 # 隐私卫士 PrivacyGuard
 
+[![Release](https://img.shields.io/github/v/release/antaopan/privacyguard?display_name=tag&sort=semver)](https://github.com/antaopan/privacyguard/releases)
+[![License: MIT](https://img.shields.io/github/license/antaopan/privacyguard)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20x64-0078D4)](https://github.com/antaopan/privacyguard)
+
 面向 Windows 桌面 AI 应用的本地隐私闸门：**网络隔离 + 系统 AI 数据采集加固 + 环境指纹伪装 + 敏感环境变量剥离**。
 
 > 适用场景：你希望 Claude Desktop、ChatGPT、Qwen、Kimi、Cursor 等 AI 应用在你这台电脑上“少拿数据、少联网、少留指纹”，同时仍然保留一个可审计、可随时暂停的控制台。
