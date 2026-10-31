@@ -33,7 +33,7 @@ if (Test-Path $packageDir) {
 New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
 
 Copy-Item -Path $exe -Destination $packageDir -Force
-foreach ($name in @('README.md', 'LICENSE', 'install.ps1', 'uninstall.ps1')) {
+foreach ($name in @('README.md', 'CHANGELOG.md', 'LICENSE', 'install.ps1', 'uninstall.ps1')) {
     Copy-Item -Path (Join-Path $root $name) -Destination $packageDir -Force
 }
 
