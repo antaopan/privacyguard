@@ -1,0 +1,30 @@
+# Build output
+bin/
+obj/
+dist/
+*.user
+*.suo
+.vs/
+
+# Local test output / generated executables
+Tools/Probe/*.exe
+Tools/Probe/*.pdb
+Tools/Harness/*.exe
+Tools/Harness/*.pdb
+Tools/Harness/data/
+Tools/Harness/*.png
+Tools/Harness/*.json
+Tools/Harness/*.js
+Tools/Harness/*.txt
+Tools/Harness/*.log
+
+# OS / editor noise
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.bak
+*.tmp
+
+# Local tooling
+_tools/
+
