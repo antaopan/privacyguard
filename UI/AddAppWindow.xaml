@@ -76,7 +76,7 @@
 
                     <TextBlock Text="说明" Style="{StaticResource SectionLabel}" Margin="0,18,0,6" />
                     <TextBlock FontSize="10.5" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap">
-                        选择“整个安装目录”会为该目录下的可执行文件创建规则，能覆盖 Claude 等应用的 Squirrel 版本目录。完全断网会让云端 AI 无法使用；仅阻止入站不会影响应用联网，但无法阻止云端收集。
+                        自动处理范围只有 Claude / Gemini / Codex；这里可以手动添加任何其他 AI 应用。选择“整个安装目录”会为该目录下的可执行文件创建规则。完全断网会让云端 AI 无法使用；仅阻止入站不会影响应用联网，但无法阻止云端收集。
                     </TextBlock>
                 </StackPanel>
             </ScrollViewer>

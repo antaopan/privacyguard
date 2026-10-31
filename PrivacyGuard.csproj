@@ -54,6 +54,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Core\AppDiscovery.cs" />
     <Compile Include="Core\AppMatcher.cs" />
+    <Compile Include="Core\AutoEnrollment.cs" />
     <Compile Include="Core\ClipboardGuard.cs" />
     <Compile Include="Core\ConfigStore.cs" />
     <Compile Include="Core\Engine.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Core\ServiceControl.cs" />
     <Compile Include="Core\ShieldLauncher.cs" />
     <Compile Include="Core\ShieldRegistry.cs" />
+    <Compile Include="Core\ShieldVerification.cs" />
     <Compile Include="Core\StatusStore.cs" />
     <Compile Include="UI\Converters.cs" />
     <Compile Include="UI\MainWindow.xaml.cs">

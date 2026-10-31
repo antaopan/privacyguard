@@ -28,3 +28,8 @@ Desktop.ini
 # Local tooling
 _tools/
 
+
+# Node / Electron probe
+node_modules/
+Tools/Verify/electron-probe/out*.json
+

@@ -45,7 +45,7 @@ namespace PrivacyGuard
             "GPG_AGENT_INFO", "KRB5CCNAME", "NPM_TOKEN", "GITHUB_TOKEN", "GH_TOKEN"
         };
 
-        public static ShieldLaunchResult Launch(AppRule app, LauncherConfig config, string extraArgs)
+        public static ShieldLaunchResult Launch(AppRule app, LauncherConfig config, string extraArgs, bool hideWindow = false)
         {
             ShieldLaunchResult result = new ShieldLaunchResult();
             if (app == null || string.IsNullOrEmpty(app.Path))
@@ -115,7 +115,7 @@ namespace PrivacyGuard
                 si.cb = Marshal.SizeOf(typeof(NativeMethods.STARTUPINFO));
                 si.lpDesktop = "winsta0\\default";
                 si.dwFlags = (int)NativeMethods.STARTF_USESHOWWINDOW;
-                si.wShowWindow = NativeMethods.SW_SHOWNORMAL;
+                si.wShowWindow = hideWindow ? (short)0 : NativeMethods.SW_SHOWNORMAL;
 
                 NativeMethods.PROCESS_INFORMATION pi;
                 ShieldRegistry.Begin(exe);
@@ -124,7 +124,7 @@ namespace PrivacyGuard
                     NativeMethods.LOGON_WITH_PROFILE,
                     exe,
                     commandLine,
-                    NativeMethods.CREATE_UNICODE_ENVIRONMENT,
+                    NativeMethods.CREATE_UNICODE_ENVIRONMENT | (hideWindow ? NativeMethods.CREATE_NO_WINDOW : 0),
                     envBlock,
                     workingDir,
                     ref si,
@@ -259,6 +259,9 @@ namespace PrivacyGuard
             }
 
             env.Remove("__COMPAT_LAYER");
+            // 防止宿主环境把 Electron 应用强制当成 Node 运行，或通过 NODE_OPTIONS 注入预加载脚本。
+            env.Remove("ELECTRON_RUN_AS_NODE");
+            env.Remove("NODE_OPTIONS");
             return env;
         }
 
@@ -295,8 +298,9 @@ namespace PrivacyGuard
             sb.Append(Quote(exe));
             if (config.ChromiumLang && AppMatcher.IsChromiumApp(exe))
             {
-                sb.Append(" --lang=");
-                sb.Append(string.IsNullOrEmpty(config.Language) ? "en-US" : config.Language.Trim());
+                string language = string.IsNullOrEmpty(config.Language) ? "en-US" : config.Language.Trim();
+                sb.Append(" --lang=").Append(language);
+                sb.Append(" --accept-lang=").Append(language);
             }
 
             if (!string.IsNullOrEmpty(config.ExtraArgs)) sb.Append(" ").Append(config.ExtraArgs.Trim());
@@ -339,7 +343,7 @@ namespace PrivacyGuard
             }
             if (config.ChromiumLang)
             {
-                list.Add(new KeyValuePair<string, string>("Chromium 参数", "--lang=" + language));
+                list.Add(new KeyValuePair<string, string>("Chromium 参数", "--lang=" + language + "  --accept-lang=" + language));
             }
             if (config.StripSecrets)
             {

@@ -6,7 +6,7 @@
 
 面向 Windows 桌面 AI 应用的本地隐私闸门：**网络隔离 + 系统 AI 数据采集加固 + 环境指纹伪装 + 敏感环境变量剥离**。
 
-> 适用场景：你希望 Claude Desktop、ChatGPT、Qwen、Kimi、Cursor 等 AI 应用在你这台电脑上“少拿数据、少联网、少留指纹”，同时仍然保留一个可审计、可随时暂停的控制台。
+> 适用场景：你希望 Claude、Gemini、Codex 等 AI 应用在你这台电脑上“少拿数据、少联网、少留指纹”，同时仍然保留一个可审计、可随时暂停的控制台。**自动处理范围只有 Claude / Gemini / Codex，其他 AI 应用必须手动加入黑名单。**
 >
 > **重要边界**：本程序不是内核沙箱，也不是杀毒软件。任意以你的用户身份运行的 Win32 程序，仍然可以直接调用系统 API 读取时区、语言、本机 IP。PrivacyGuard 做的是“阻断网络外发 + 降低默认采集成功率”，而不是对所有读取行为做内核级拒绝。真正的对抗性隔离请使用独立 Windows 账户、Windows Sandbox 或虚拟机，详见[安全模型](#安全模型与边界必读)。
 
@@ -17,13 +17,14 @@
 | 能力 | 实现方式 |
 | --- | --- |
 | 开机自启动 | 后台服务自动启动；登录时通过计划任务以最高权限启动托盘界面（`--minimized`） |
-| 应用黑名单 | 按 exe / 整个安装目录管理；自动扫描已安装与运行中的常见 AI 应用 |
+| 应用黑名单 | 自动发现并纳入 **Claude / Gemini / Codex**；其他应用通过“添加程序”手动加入。按 exe / 整个安装目录管理 |
 | 网络隔离（IP 防护） | 通过 Windows 防火墙（WFP）为每个可执行文件创建入站 / 出站阻断规则 |
 | 完全断网 | 阻断入站 + 出站，应用无法把 IP、时区、语言、文件内容发往远程 |
 | 仅阻止入站 | 允许应用联网，但阻止其他机器通过本机 IP 连入其监听端口 |
 | 仅阻止局域网 | 阻断对本机所在局域网的访问，保留互联网访问（可能影响路由器 DNS） |
-| 时区伪装 | 以 `TZ=UTC` 启动目标应用；Node 24 已验证 `Intl` 时区会跟随，Electron 依赖同一 ICU 机制但未逐版本验证 |
-| 语言伪装 | 注入 `LANG` / `LC_ALL` / `LANGUAGE`，并为 Chromium / Electron 附加 `--lang=en-US` |
+| 时区伪装 | 以 `TZ=UTC` 启动目标应用；Node 24 与 Electron 45 的主进程 / 渲染进程均已实测跟随 |
+| 语言伪装 | 注入 `LANG` / `LC_ALL` / `LANGUAGE`，并为 Chromium / Electron 附加 `--lang` / `--accept-lang`；**部分生效** |
+| 能力自检 | 启动器页“运行环境自检”或 `--verify`，报告系统语言读取、子进程 `TZ` / `LANG`、Node `Intl` 结果 |
 | 密钥剥离 | 移除 `OPENAI_API_KEY`、`ANTHROPIC_API_KEY`、`AWS_*`、`*TOKEN*` 等常见凭据变量 |
 | 标准用户启动 | 从 Explorer 复制访问令牌启动应用，避免 AI 应用继承管理员权限（UAC 正常时） |
 | 进程监控 | 服务每 1.5 秒扫描黑名单进程，记录并可选终止；新出现的子程序会即时补规则 |
@@ -45,7 +46,7 @@
 
 ### 从发布包安装
 
-1. 解压 `PrivacyGuard-1.0.0-win-x64.zip` 到任意目录。
+1. 解压 `PrivacyGuard-1.1.0-win-x64.zip` 到任意目录。
 2. 右键 `install.ps1` → **使用 PowerShell 运行**；或在管理员 PowerShell 中执行：
 
    ```powershell
@@ -53,7 +54,7 @@
    ```
 
 3. 安装程序会复制到 `C:\Program Files\PrivacyGuard`，注册后台服务、登录自启任务、开始菜单快捷方式和卸载登记。
-4. 首次启动后，进入 **应用黑名单** 添加程序；建议先点 **扫描 AI 应用**。
+4. 首次启动会自动发现并纳入 Claude / Gemini / Codex（默认“仅阻止入站 + 隐私启动器”）。其他 AI 应用需进入 **应用黑名单 → 添加程序** 手动选择 exe。
 
 可选参数：
 
@@ -81,15 +82,33 @@
 
 ## 快速开始
 
-1. **添加黑名单**：应用黑名单 → 添加程序 / 扫描 AI 应用。默认范围是“整个安装目录”（能覆盖 Claude 等 Squirrel 版本目录）。
+1. **自动范围**：Claude / Gemini / Codex 会自动加入黑名单；其他应用点击“添加程序”手动加入。桌面版默认范围是“整个安装目录”（能覆盖 Squirrel 版本目录），Codex 原生 exe 使用单文件规则。
 2. **选择网络策略**：
-   - 云端 AI 需要联网 → 选 **仅阻止入站** 或 **仅阻止局域网**；
+   - 云端 AI 需要联网 → 保持自动默认的 **仅阻止入站**，或选 **仅阻止局域网**；
    - 需要彻底阻断外发 → 选 **完全断网**（此时云端 AI 不能工作，本地模型仍可使用）。
 3. **系统加固**：点“应用推荐配置”，或逐项开启。默认推荐项为 Recall、Copilot、剪贴板云同步、广告 ID、活动历史、云搜索。
 4. **隐私启动器**：选择应用 → “以隐私模式启动”。它会以 `UTC / en-US / 密钥剥离 / 中立工作目录` 启动。
-5. **验证**：总览页显示服务、防火墙、规则数量与拦截次数；“立即隔离”可随时终止所有匹配进程。
+5. **能力自检**：启动器页 → “运行环境自检”，或命令行 `PrivacyGuard.exe --verify --report <文件> --quiet`。报告会显示系统语言读取值、子进程 TZ/LANG、Node Intl 时区与 locale。
+6. **验证**：总览页显示服务、防火墙、规则数量与拦截次数；“立即隔离”可随时终止所有匹配进程。
 
 服务在开机时自动运行；托盘界面在登录时自动启动。关闭窗口默认只最小化到托盘，不停止防护。
+
+---
+
+## 自动处理范围
+
+只有以下三类应用会被主动发现、自动纳入黑名单，并默认启用“仅阻止入站 + 隐私启动器”：
+
+| 应用 | 检测方式 |
+| --- | --- |
+| **Claude** | `AnthropicClaude`、`Programs\Claude`、npm `@anthropic-ai/claude-code` 等常见路径；运行进程名 `claude` |
+| **Gemini** | `%LOCALAPPDATA%\Google\Gemini`、`Programs\Gemini`；运行进程名 `gemini` |
+| **Codex** | `%LOCALAPPDATA%\OpenAI\Codex\bin\<hash>\codex.exe`、npm `@openai/codex` 原生 exe；运行进程名 `codex` |
+
+- 自动纳入只在界面启动时执行一次；用户移除后不会再次自动加回（`autoAdded` 会记住已处理类型）。
+- Codex 的版本目录带哈希，升级后路径变化时，自动规则会在下次启动时更新。
+- **其他 AI 应用一律不自动加入**：ChatGPT、Qwen、Kimi、Ollama、LM Studio、Cursor、Windsurf、Poe 等都必须通过“添加程序”手动选择 exe。
+- 自动纳入默认仅阻止入站，避免云端 AI 完全断网；需要阻断外发时，在应用行把网络策略改为“完全断网”。
 
 ---
 
@@ -123,15 +142,22 @@ PRIVACYGUARD_SHIELD=1
 可选：
 
 - `COMPUTERNAME=<你填写的伪装名>`（只影响读取环境变量的应用，不改变 `GetComputerName`）
-- Chromium / Electron：追加 `--lang=en-US`
+- Chromium / Electron：追加 `--lang=<语言>` 与 `--accept-lang=<语言>`
 - 剥离常见 API Key / Token / Secret / Password / 私钥路径相关环境变量
+- 剔除 `ELECTRON_RUN_AS_NODE` 与 `NODE_OPTIONS`，避免宿主环境干扰 Electron 启动
 - 中立工作目录：`%ProgramData%\PrivacyGuard\work\<应用名>`
 
 已验证：
 
-- Node.js 24 的 `Intl.DateTimeFormat().resolvedOptions().timeZone` 跟随 `TZ=UTC`（Electron 使用同一类 ICU 环境变量机制，但未逐版本验证）；
-- 启动器会复制 Explorer 的访问令牌；本测试机 UAC 关闭，因此进程仍是管理员，界面会明确警告；UAC 正常时应为标准用户；
-- 敏感环境变量在子进程中不可见。
+- **时区**：Node 24 的 `Intl` 时区跟随 `TZ=UTC`；Electron 45.2.1 的主进程和渲染进程 `Intl` 时区均变为 `UTC`。
+- **语言环境**：子进程可见 `LANG/LC_ALL/LANGUAGE`，且敏感变量被剥离。
+- **Electron 语言**：`--lang=en-US` 可把 `app.getLocale()`、渲染进程 `navigator.language`、`Intl` locale 变为 `en-US`。
+- **语言限制**：`LANG` 单独不会改变 Node/Electron 主进程 locale；`navigator.languages`、`app.getPreferredSystemLanguages()`、`getLocaleCountryCode()` 和原生 Win32 语言 API 仍可能泄漏系统值。
+- **Gemini 实测**：Gemini 1.17.0 桌面版带 `--lang=en-US` 启动后，页面内容仍按账号/地区显示中文；应用还拒绝 `--remote-debugging-port`，因此无法直接读取其内部时区。
+- **Claude 实测**：本测试机没有 Claude 桌面 exe，只有浏览器中的 Claude 网页；无法对浏览器标签做 per-app 防火墙/启动器验证。
+- 启动器会复制 Explorer 的访问令牌；本测试机 UAC 关闭，因此进程仍是管理员，界面会明确警告；UAC 正常时应为标准用户。
+
+完整测试数据、版本和复现步骤见 [VERIFICATION.md](VERIFICATION.md)。**结论：时区修改是可验证的；语言只完成环境层注入与 Electron 渲染层部分伪装，不是完整语言隔离。**
 
 **未验证/不保证**：并非所有 Electron 版本的 UI 语言都跟随 `--lang`；原生 Win32 程序的 `GetTimeZoneInformation` / `GetUserDefaultUILanguage` 通常**不会**被 `LANG` 改变；也不能保证应用读取 `COMPUTERNAME` 环境变量——很多程序会直接调用 `GetComputerName`。
 
@@ -224,7 +250,7 @@ dist\PrivacyGuard\install.ps1
 dist\PrivacyGuard\uninstall.ps1
 dist\PrivacyGuard\README.md
 dist\PrivacyGuard\LICENSE
-dist\PrivacyGuard-1.0.0-win-x64.zip
+dist\PrivacyGuard-1.1.0-win-x64.zip
 dist\SHA256SUMS.txt
 ```
 
@@ -246,13 +272,17 @@ Core\
   PolicyManager.cs         HKLM 加固策略与备份恢复
   Engine.cs                服务主循环
   ShieldLauncher.cs        标准用户令牌 + 环境变量启动
+  ShieldVerification.cs    --verify / 界面自检：TZ、LANG、系统语言读取
   ClipboardGuard.cs        剪贴板密钥检测
-  AppDiscovery.cs          已安装 / 运行中 AI 应用扫描
+  AppDiscovery.cs          仅 Claude / Gemini / Codex 的自动发现
+  AutoEnrollment.cs        三应用自动纳入与路径更新
   Installer.cs             服务、计划任务、快捷方式、卸载登记
   PrivacyGuardService.cs   ServiceBase 宿主
 UI\                        WPF 控制台
 Tools\Probe\               测试用探针
 Tools\Harness\             测试驱动
+Tools\Verify\electron-probe\  Electron 时区 / 语言验证材料
+VERIFICATION.md            实测数据与复现步骤
 ```
 
 测试驱动：
@@ -263,7 +293,7 @@ $env:NODE_EXE = (Get-Command node).Source
 .\Tools\Harness\PrivacyGuard.Harness.exe all
 ```
 
-覆盖：防火墙出站阻断与恢复、Explorer 令牌启动（本测试机 UAC 关闭）、环境变量注入/剥离、Node 时区、策略备份/恢复、配置 round-trip、应用扫描。
+覆盖：防火墙出站阻断与恢复、Explorer 令牌启动（本测试机 UAC 关闭）、环境变量注入/剥离、Node 时区、策略备份/恢复、配置 round-trip、三应用自动发现。
 
 ---
 
@@ -333,4 +363,6 @@ Get-Content C:\ProgramData\PrivacyGuard\logs\service-$(Get-Date -Format yyyyMMdd
 ## License
 
 MIT。见 [LICENSE](LICENSE)。
+
+
 

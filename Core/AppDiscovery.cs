@@ -8,68 +8,74 @@ namespace PrivacyGuard
 {
     public static class AppDiscovery
     {
+        public static readonly string[] AutoManagedIds = { "claude", "gemini", "codex" };
+        public static readonly string[] AutoManagedNames = { "Claude", "Gemini", "Codex" };
+
         private class KnownApp
         {
+            public string Id;
             public string Name;
             public string[] Keywords;
             public string[] ExeNames;
             public string[] RelativePaths;
+            public string[] AbsolutePaths;
         }
 
+        /// <summary>
+        /// 只自动发现这三类应用。其他应用必须由用户通过“添加程序”手动加入黑名单。
+        /// </summary>
         private static List<KnownApp> Known()
         {
             List<KnownApp> list = new List<KnownApp>();
-            Add(list, "Claude Desktop", new[] { "anthropic", "claude" }, new[] { "claude.exe" },
-                new[] { @"AnthropicClaude", @"Programs\Claude", @"Programs\AnthropicClaude" });
-            Add(list, "ChatGPT", new[] { "chatgpt", "openai" }, new[] { "chatgpt.exe" },
-                new[] { @"Programs\ChatGPT", @"ChatGPT" });
-            Add(list, "Cursor", new[] { "cursor" }, new[] { "cursor.exe" },
-                new[] { @"Programs\cursor", @"Programs\Cursor" });
-            Add(list, "Windsurf", new[] { "windsurf", "codeium" }, new[] { "windsurf.exe" },
-                new[] { @"Programs\Windsurf" });
-            Add(list, "Perplexity", new[] { "perplexity" }, new[] { "perplexity.exe" },
-                new[] { @"Programs\Perplexity" });
-            Add(list, "Gemini", new[] { "gemini", "google gemini" }, new[] { "gemini.exe" },
-                new[] { @"Programs\Gemini" });
-            Add(list, "Poe", new[] { "poe" }, new[] { "poe.exe" },
-                new[] { @"Programs\Poe" });
-            Add(list, "Ollama", new[] { "ollama" }, new[] { "ollama app.exe", "ollama.exe" },
-                new[] { @"Programs\Ollama", @"Ollama" });
-            Add(list, "LM Studio", new[] { "lm studio", "lmstudio" }, new[] { "lm studio.exe", "lmstudio.exe" },
-                new[] { @"LM-Studio", @"Programs\LM Studio" });
-            Add(list, "Jan", new[] { "jan.ai", "jan " }, new[] { "jan.exe" },
-                new[] { @"Programs\Jan", @"Jan" });
-            Add(list, "Msty", new[] { "msty" }, new[] { "msty.exe" },
-                new[] { @"Programs\Msty" });
-            Add(list, "AnythingLLM", new[] { "anythingllm" }, new[] { "anythingllm.exe", "anythingllm desktop.exe" },
-                new[] { @"Programs\AnythingLLM" });
-            Add(list, "Chatbox", new[] { "chatbox" }, new[] { "chatbox.exe" },
-                new[] { @"Programs\Chatbox" });
-            Add(list, "DeepSeek", new[] { "deepseek" }, new[] { "deepseek.exe" },
-                new[] { @"Programs\DeepSeek" });
-            Add(list, "Qwen / 通义千问", new[] { "qwen", "通义" }, new[] { "qwen.exe" },
-                new[] { @"Programs\Qwen", @"Qwen" });
-            Add(list, "Kimi", new[] { "kimi", "月之暗面" }, new[] { "kimi.exe" },
-                new[] { @"Programs\Kimi", @"Kimi" });
-            Add(list, "豆包", new[] { "doubao", "豆包" }, new[] { "doubao.exe" },
-                new[] { @"Programs\Doubao", @"Doubao" });
-            Add(list, "腾讯元宝", new[] { "yuanbao", "元宝" }, new[] { "yuanbao.exe" },
-                new[] { @"Programs\Yuanbao", @"Yuanbao" });
-            Add(list, "智谱清言", new[] { "chatglm", "zhipu", "智谱" }, new[] { "chatglm.exe" },
-                new[] { @"Programs\ChatGLM", @"ChatGLM" });
-            Add(list, "文心一言", new[] { "wenxin", "文心" }, new[] { "wenxin.exe" },
-                new[] { @"Programs\Wenxin", @"Wenxin" });
+            Add(list, "claude", "Claude",
+                new[] { "anthropic", "claude" },
+                new[] { "claude.exe" },
+                new[] { @"AnthropicClaude", @"Programs\Claude", @"Programs\AnthropicClaude" },
+                new[] { @"%APPDATA%\npm\node_modules\@anthropic-ai\claude-code" });
+
+            Add(list, "gemini", "Gemini",
+                new[] { "gemini", "google gemini" },
+                new[] { "gemini.exe" },
+                new[] { @"Programs\Gemini", @"Google\Gemini", @"Gemini" },
+                new[] { @"%LOCALAPPDATA%\Google\Gemini", @"%APPDATA%\npm\node_modules\@google\gemini-cli" });
+
+            Add(list, "codex", "Codex",
+                new[] { "codex", "openai codex" },
+                new[] { "codex.exe" },
+                new[] { @"Programs\Codex", @"OpenAI\Codex" },
+                new[]
+                {
+                    @"%APPDATA%\npm\node_modules\@openai\codex\node_modules\@openai\codex-win32-x64\vendor\x86_64-pc-windows-msvc\bin\codex.exe",
+                    @"%LOCALAPPDATA%\OpenAI\Codex"
+                });
             return list;
         }
 
-        private static void Add(List<KnownApp> list, string name, string[] keywords, string[] exeNames, string[] relativePaths)
+        private static void Add(List<KnownApp> list, string id, string name, string[] keywords,
+            string[] exeNames, string[] relativePaths, string[] absolutePaths)
         {
             KnownApp app = new KnownApp();
+            app.Id = id;
             app.Name = name;
             app.Keywords = keywords;
             app.ExeNames = exeNames;
             app.RelativePaths = relativePaths;
+            app.AbsolutePaths = absolutePaths;
             list.Add(app);
+        }
+
+        public static bool IsAutoManaged(string nameOrId)
+        {
+            if (string.IsNullOrEmpty(nameOrId)) return false;
+            for (int i = 0; i < AutoManagedIds.Length; i++)
+            {
+                if (string.Equals(nameOrId, AutoManagedIds[i], StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(nameOrId, AutoManagedNames[i], StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public static List<DetectedApp> Detect()
@@ -85,14 +91,24 @@ namespace PrivacyGuard
             {
                 for (int i = 0; i < app.RelativePaths.Length; i++)
                 {
-                    string basePath = i == 0 || app.RelativePaths[i].StartsWith("Programs\\", StringComparison.OrdinalIgnoreCase)
-                        ? Path.Combine(local, app.RelativePaths[i])
-                        : Path.Combine(local, app.RelativePaths[i]);
-                    TryAddDirectory(result, app, basePath);
+                    TryAddDirectory(result, app, Path.Combine(local, app.RelativePaths[i]));
                     TryAddDirectory(result, app, Path.Combine(programs, Path.GetFileName(app.RelativePaths[i])));
                     if (!string.IsNullOrEmpty(programsX86))
                     {
                         TryAddDirectory(result, app, Path.Combine(programsX86, Path.GetFileName(app.RelativePaths[i])));
+                    }
+                }
+
+                for (int i = 0; i < app.AbsolutePaths.Length; i++)
+                {
+                    string absolute = Environment.ExpandEnvironmentVariables(app.AbsolutePaths[i]);
+                    if (File.Exists(absolute))
+                    {
+                        AddDetected(result, app, absolute, "常见安装位置");
+                    }
+                    else if (Directory.Exists(absolute))
+                    {
+                        TryAddDirectory(result, app, absolute);
                     }
                 }
             }
@@ -103,11 +119,13 @@ namespace PrivacyGuard
             ScanUninstall(result, known, RegistryHive.CurrentUser, RegistryView.Registry32);
 
             List<DetectedApp> distinct = new List<DetectedApp>();
-            HashSet<string> seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> seenKinds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (DetectedApp app in result)
             {
                 string path = AppPaths.CleanPath(app.ExePath);
-                if (string.IsNullOrEmpty(path) || !seen.Add(path)) continue;
+                if (string.IsNullOrEmpty(path) || !seenPaths.Add(path)) continue;
+                if (!string.IsNullOrEmpty(app.Id) && !seenKinds.Add(app.Id)) continue;
                 app.ExePath = path;
                 distinct.Add(app);
             }
@@ -128,20 +146,18 @@ namespace PrivacyGuard
                 {
                     try
                     {
-                        if (process.MainWindowHandle == IntPtr.Zero) continue;
                         string processName = process.ProcessName;
                         if (IsBrowserProcess(processName)) continue;
-                        KnownApp match = FindMatch(known, processName);
-                        if (match == null) match = FindMatch(known, process.MainWindowTitle);
+                        KnownApp match = FindProcessMatch(known, processName);
+                        if (match == null)
+                        {
+                            if (process.MainWindowHandle == IntPtr.Zero) continue;
+                            match = FindMatch(known, process.MainWindowTitle);
+                        }
                         if (match == null) continue;
                         string path = process.MainModule.FileName;
-                        if (string.IsNullOrEmpty(path) || !File.Exists(path)) continue;
-                        DetectedApp app = new DetectedApp();
-                        app.Name = match.Name;
-                        app.ExePath = AppPaths.CleanPath(path);
-                        app.Source = "运行中的程序";
-                        app.Installed = true;
-                        result.Add(app);
+                        if (string.IsNullOrEmpty(path) || !File.Exists(path) || IsUninstaller(path)) continue;
+                        AddDetected(result, match, path, "运行中的程序");
                     }
                     catch
                     {
@@ -157,17 +173,23 @@ namespace PrivacyGuard
             }
         }
 
+        private static void AddDetected(List<DetectedApp> result, KnownApp known, string exePath, string source)
+        {
+            DetectedApp app = new DetectedApp();
+            app.Id = known.Id;
+            app.Name = known.Name;
+            app.ExePath = AppPaths.CleanPath(exePath);
+            app.Source = source;
+            app.Installed = true;
+            result.Add(app);
+        }
+
         private static void TryAddDirectory(List<DetectedApp> result, KnownApp known, string dir)
         {
             if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir)) return;
             string exe = FindExecutable(dir, known, 0);
             if (string.IsNullOrEmpty(exe)) return;
-            DetectedApp app = new DetectedApp();
-            app.Name = known.Name;
-            app.ExePath = exe;
-            app.Source = "常见安装目录";
-            app.Installed = true;
-            result.Add(app);
+            AddDetected(result, known, exe, "常见安装目录");
         }
 
         private static void ScanUninstall(List<DetectedApp> result, List<KnownApp> known, RegistryHive hive, RegistryView view)
@@ -190,12 +212,7 @@ namespace PrivacyGuard
 
                             string exe = ResolveFromRegistry(sub, match);
                             if (string.IsNullOrEmpty(exe)) continue;
-                            DetectedApp app = new DetectedApp();
-                            app.Name = match.Name;
-                            app.ExePath = exe;
-                            app.Source = "已安装程序";
-                            app.Installed = true;
-                            result.Add(app);
+                            AddDetected(result, match, exe, "已安装程序");
                         }
                     }
                 }
@@ -227,8 +244,24 @@ namespace PrivacyGuard
                    name.StartsWith("update", StringComparison.OrdinalIgnoreCase);
         }
 
+        private static KnownApp FindProcessMatch(List<KnownApp> known, string processName)
+        {
+            if (string.IsNullOrEmpty(processName)) return null;
+            for (int i = 0; i < known.Count; i++)
+            {
+                if (string.Equals(processName, known[i].Id, StringComparison.OrdinalIgnoreCase)) return known[i];
+                for (int e = 0; e < known[i].ExeNames.Length; e++)
+                {
+                    string name = Path.GetFileNameWithoutExtension(known[i].ExeNames[e]);
+                    if (string.Equals(processName, name, StringComparison.OrdinalIgnoreCase)) return known[i];
+                }
+            }
+            return null;
+        }
+
         private static KnownApp FindMatch(List<KnownApp> known, string display)
         {
+            if (string.IsNullOrEmpty(display)) return null;
             for (int i = 0; i < known.Count; i++)
             {
                 for (int k = 0; k < known[i].Keywords.Length; k++)
@@ -324,9 +357,7 @@ namespace PrivacyGuard
 
                 foreach (string file in files)
                 {
-                    string name = Path.GetFileNameWithoutExtension(file);
-                    if (name.StartsWith("unins", StringComparison.OrdinalIgnoreCase)) continue;
-                    if (name.StartsWith("update", StringComparison.OrdinalIgnoreCase)) continue;
+                    if (IsUninstaller(file)) continue;
                     if (best == null || new FileInfo(file).Length > new FileInfo(best).Length) best = file;
                 }
                 if (best != null) return best;

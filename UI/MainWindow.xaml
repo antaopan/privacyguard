@@ -145,7 +145,7 @@
                                 </Grid>
                                 <TextBlock Text="{Binding LastSyncText}" FontSize="10" Foreground="#5F7490" Margin="0,7,0,0" />
                                 <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,10,0,8" />
-                                <TextBlock Text="v1.0.0 · Windows" FontSize="10" Foreground="#5F7490" />
+                                <TextBlock Text="v1.1.0 · Windows" FontSize="10" Foreground="#5F7490" />
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -451,7 +451,7 @@
                                     <TextBox x:Name="AppSearch" Width="240" Height="32" TextChanged="AppSearch_TextChanged" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="扫描 AI 应用" Click="ScanApps_Click" Margin="0,0,8,0" />
+                                    <Button Content="扫描 Claude / Gemini / Codex" Click="ScanApps_Click" Margin="0,0,8,0" />
                                     <Button Content="+  添加程序" Style="{StaticResource PrimaryButton}" Click="AddApp_Click" />
                                 </StackPanel>
                             </Grid>
@@ -461,7 +461,7 @@
                                     <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFont}" FontSize="13"
                                                Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" />
                                     <TextBlock Margin="8,0,0,0" FontSize="10.5" Foreground="#8FA3BD" TextWrapping="Wrap">
-                                        “完全断网”会同时阻断入站和出站流量，云端 AI 将无法使用；需要继续联网时改用“仅阻止入站”，它只防止其他机器通过本机 IP 连入。
+                                        自动处理仅限 Claude / Gemini / Codex：首次启动会自动发现并纳入（默认“仅阻止入站 + 隐私启动器”）。其他应用不会被自动加入，请用“添加程序”手动添加。云端 AI 需要完整功能时不要选“完全断网”。
                                     </TextBlock>
                                 </StackPanel>
                             </Border>
@@ -537,7 +537,7 @@
                                                Foreground="#2E435A" HorizontalAlignment="Center" />
                                     <TextBlock Text="还没有黑名单应用" FontSize="16" FontWeight="SemiBold"
                                                HorizontalAlignment="Center" Margin="0,14,0,4" />
-                                    <TextBlock Text="添加 Claude、ChatGPT、Cursor 等应用后，网络隔离与进程监控才会开始工作。"
+                                    <TextBlock Text="Claude、Gemini、Codex 会自动纳入；其他 AI 应用请手动添加程序。"
                                                FontSize="11" Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Center"
                                                MaxWidth="440" TextWrapping="Wrap" TextAlignment="Center" />
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0">
@@ -668,8 +668,11 @@
                                         <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,10,0,14" />
                                         <Button x:Name="LaunchButton" Content="以隐私模式启动" Style="{StaticResource PrimaryButton}"
                                                 Height="38" Click="LaunchShield_Click" />
+                                        <Button Content="运行环境自检" Style="{StaticResource GhostButton}" Height="30"
+                                                Margin="0,5,0,0" Click="VerifyEnvironment_Click"
+                                                ToolTip="验证 TZ 时区修改、LANG 注入与系统语言读取结果" />
                                         <TextBlock Text="{Binding ShieldSummary}" FontSize="10" Foreground="#5F7490"
-                                                   HorizontalAlignment="Center" Margin="0,8,0,0" />
+                                                   HorizontalAlignment="Center" Margin="0,6,0,0" />
                                         <Border Background="#0A1826" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                                                 CornerRadius="9" Padding="12,10" Margin="0,18,0,0">
                                             <StackPanel>
@@ -964,7 +967,7 @@
                                     <Grid>
                                         <StackPanel>
                                             <TextBlock Text="关于 PrivacyGuard" Style="{StaticResource H2}" FontSize="16" />
-                                            <TextBlock Text="本机 AI 隐私闸门 · 版本 1.0.0 · .NET Framework 4.8 · x64"
+                                            <TextBlock Text="本机 AI 隐私闸门 · 版本 1.1.0 · .NET Framework 4.8 · x64"
                                                        Style="{StaticResource MutedText}" Margin="0,5,0,0" />
                                             <TextBlock Foreground="#667C95" FontSize="10" Margin="0,10,0,0" TextWrapping="Wrap"
                                                        MaxWidth="650" HorizontalAlignment="Left" TextAlignment="Left">
@@ -1007,3 +1010,4 @@
         </Grid>
     </Border>
 </Window>
+

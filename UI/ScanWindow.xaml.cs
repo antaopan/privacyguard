@@ -33,6 +33,7 @@ namespace PrivacyGuard
                 foreach (DetectedApp app in apps)
                 {
                     ScanItem item = new ScanItem();
+                    item.Id = app.Id;
                     item.Name = app.Name;
                     item.ExePath = app.ExePath;
                     item.Source = app.Source;
@@ -82,14 +83,14 @@ namespace PrivacyGuard
                 AppRule rule = new AppRule();
                 rule.Name = item.Name;
                 rule.Path = item.ExePath;
-                rule.Scope = Scopes.Folder;
+                rule.Scope = string.Equals(item.Id, "codex", StringComparison.OrdinalIgnoreCase) ? Scopes.File : Scopes.Folder;
                 rule.Root = AppMatcher.InferRoot(item.ExePath);
                 if (string.IsNullOrEmpty(rule.Root))
                 {
                     rule.Scope = Scopes.File;
                     rule.Root = "";
                 }
-                rule.Network = NetworkModes.Full;
+                rule.Network = NetworkModes.Inbound;
                 rule.Shield = true;
                 rule.Kill = false;
                 rule.Enabled = true;
@@ -134,6 +135,7 @@ namespace PrivacyGuard
     public class ScanItem : INotifyPropertyChanged
     {
         private bool _isSelected;
+        public string Id { get; set; }
         public string Name { get; set; }
         public string ExePath { get; set; }
         public string Source { get; set; }
@@ -141,6 +143,7 @@ namespace PrivacyGuard
 
         public ScanItem()
         {
+            Id = "";
             Name = "";
             ExePath = "";
             Source = "";
@@ -162,4 +165,5 @@ namespace PrivacyGuard
         public event PropertyChangedEventHandler PropertyChanged;
     }
 }
+
 

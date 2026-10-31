@@ -49,6 +49,7 @@ namespace PrivacyGuard
         private bool _serviceProbeRunning;
         private string _lastBlockedNotified = "";
         private AppRule _browseRule;
+        private string _autoEnrollmentNotice = "";
 
         public MainWindow()
         {
@@ -60,6 +61,22 @@ namespace PrivacyGuard
             try
             {
                 AppConfig config = ConfigStore.CreateDefaultIfMissing();
+                AutoEnrollmentResult auto = AutoEnrollment.Ensure(config);
+                if (auto.Changed)
+                {
+                    ConfigStore.Save(config);
+                    UiLog.Info("AUTO_ENROLL", "自动处理应用变更：" +
+                        string.Join("、", auto.AddedNames.Concat(auto.UpdatedNames).ToArray()));
+                    if (auto.AddedNames.Count > 0)
+                    {
+                        _autoEnrollmentNotice = "已自动纳入 " + string.Join("、", auto.AddedNames.ToArray()) +
+                                                "（仅阻止入站 + 隐私启动器）";
+                    }
+                    else if (auto.UpdatedNames.Count > 0)
+                    {
+                        _autoEnrollmentNotice = "已更新自动应用路径：" + string.Join("、", auto.UpdatedNames.ToArray());
+                    }
+                }
                 _vm.Load(config);
                 _lastSavedHash = ConfigSignature(config);
             }
@@ -114,6 +131,11 @@ namespace PrivacyGuard
             _vm.SetPage(0);
             RefreshStatus();
             LoadLogsAsync();
+            if (!string.IsNullOrEmpty(_autoEnrollmentNotice))
+            {
+                Dispatcher.BeginInvoke(new Action(delegate { ShowToast(_autoEnrollmentNotice); }),
+                    DispatcherPriority.Background);
+            }
         }
 
         public bool StartMinimized
@@ -752,8 +774,8 @@ namespace PrivacyGuard
                 {
                     System.Windows.MessageBox.Show(this,
                         found.Count == 0
-                            ? "没有扫描到常见 AI 桌面应用。\r\n\r\n可以手动点击“添加程序”选择 exe 文件。"
-                            : "扫描到的应用都已在黑名单中。",
+                            ? "没有扫描到 Claude / Gemini / Codex。\r\n\r\n其他应用请手动点击“添加程序”选择 exe 文件。"
+                            : "扫描到的 Claude / Gemini / Codex 都已在黑名单中。",
                         "扫描完成", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
@@ -793,6 +815,30 @@ namespace PrivacyGuard
         private void LaunchApp_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (LaunchAppCombo.SelectedItem != null) _browseRule = null;
+        }
+
+        private async void VerifyEnvironment_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                LauncherConfig config = _vm.Launcher.Clone();
+                SetBusy(true, "正在验证时区与语言能力...");
+                ShieldVerificationReport report = await Task.Run(delegate
+                {
+                    return ShieldVerification.Verify(config);
+                });
+                SetBusy(false, "");
+                MessageBoxImage icon = report.TimeZonePass ? MessageBoxImage.Information : MessageBoxImage.Warning;
+                System.Windows.MessageBox.Show(this, report.ToText(), "时区 / 语言能力自检",
+                    MessageBoxButton.OK, icon);
+            }
+            catch (Exception ex)
+            {
+                SetBusy(false, "");
+                UiLog.Error("VERIFY_FAILED", ex.ToString());
+                System.Windows.MessageBox.Show(this, "自检失败：" + ex.Message, "自检失败",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void BrowseLaunchApp_Click(object sender, RoutedEventArgs e)
@@ -1327,5 +1373,6 @@ namespace PrivacyGuard
         }
     }
 }
+
 
 

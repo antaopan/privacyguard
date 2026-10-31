@@ -1,7 +1,7 @@
 <Window x:Class="PrivacyGuard.ScanWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="扫描 AI 应用" Width="660" Height="640" WindowStyle="None" ResizeMode="NoResize"
+        Title="扫描 Claude / Gemini / Codex" Width="660" Height="640" WindowStyle="None" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Background="{StaticResource BgBrush}"
         UseLayoutRounding="True" SnapsToDevicePixels="True">
     <Border Background="{StaticResource BgBrush}" BorderBrush="#29415A" BorderThickness="1">
@@ -18,7 +18,7 @@
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFont}" FontSize="15"
                                    Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" />
-                        <TextBlock Text="扫描已安装的 AI 应用" FontSize="14" FontWeight="SemiBold" Margin="9,0,0,0"
+                        <TextBlock Text="扫描 Claude / Gemini / Codex" FontSize="14" FontWeight="SemiBold" Margin="9,0,0,0"
                                    VerticalAlignment="Center" />
                     </StackPanel>
                     <Button Content="&#x00D7;" Style="{StaticResource WindowCloseButton}" HorizontalAlignment="Right"
@@ -33,8 +33,8 @@
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0" Margin="0,0,0,12">
                     <StackPanel>
-                        <TextBlock Text="发现以下应用" Style="{StaticResource H2}" FontSize="15" />
-                        <TextBlock Text="默认使用“整个安装目录 + 完全断网 + 隐私启动器”。添加后可以逐项调整。"
+                        <TextBlock Text="自动处理候选应用" Style="{StaticResource H2}" FontSize="15" />
+                        <TextBlock Text="只显示 Claude / Gemini / Codex；默认“仅阻止入站 + 隐私启动器”，添加后可逐项调整。其他应用请手动添加。"
                                    Style="{StaticResource MutedText}" Margin="0,4,0,0" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -93,4 +93,5 @@
         </Grid>
     </Border>
 </Window>
+
 

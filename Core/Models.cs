@@ -10,7 +10,7 @@ namespace PrivacyGuard
     {
         public const string Name = "PrivacyGuard";
         public const string DisplayName = "隐私卫士";
-        public const string Version = "1.0.0";
+        public const string Version = "1.1.0";
         public const string ServiceName = "PrivacyGuard";
         public const string TaskName = "PrivacyGuard";
         public const string FirewallGroup = "PrivacyGuard";
@@ -378,11 +378,15 @@ namespace PrivacyGuard
         [DataMember(Name = "revision", Order = 8)]
         public long Revision { get; set; }
 
+        [DataMember(Name = "autoAdded", Order = 9)]
+        public List<string> AutoAdded { get; set; }
+
         public AppConfig()
         {
             Version = 1;
             Enabled = true;
             Apps = new List<AppRule>();
+            AutoAdded = new List<string>();
             Hardening = new HardeningConfig();
             Launcher = new LauncherConfig();
             Ui = new UiConfig();
@@ -394,6 +398,7 @@ namespace PrivacyGuard
         {
             if (Version <= 0) Version = 1;
             if (Apps == null) Apps = new List<AppRule>();
+            if (AutoAdded == null) AutoAdded = new List<string>();
             if (Hardening == null) Hardening = new HardeningConfig();
             if (Launcher == null) Launcher = new LauncherConfig();
             if (Ui == null) Ui = new UiConfig();
@@ -427,6 +432,7 @@ namespace PrivacyGuard
                     if (Apps[i] != null) copy.Apps.Add(Apps[i].Clone());
                 }
             }
+            copy.AutoAdded = AutoAdded == null ? new List<string>() : new List<string>(AutoAdded);
             copy.Hardening = Hardening == null ? new HardeningConfig() : Hardening.Clone();
             copy.Launcher = Launcher == null ? new LauncherConfig() : Launcher.Clone();
             copy.Ui = Ui == null ? new UiConfig() : Ui.Clone();
@@ -636,6 +642,7 @@ namespace PrivacyGuard
 
     public class DetectedApp
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public string ExePath { get; set; }
         public string Source { get; set; }
@@ -643,6 +650,7 @@ namespace PrivacyGuard
 
         public DetectedApp()
         {
+            Id = "";
             Name = "";
             ExePath = "";
             Source = "";
@@ -650,3 +658,4 @@ namespace PrivacyGuard
         }
     }
 }
+

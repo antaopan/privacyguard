@@ -59,6 +59,29 @@ namespace PrivacyGuard
                 return result.Success ? 0 : 1;
             }
 
+            if (HasArg(args, "--verify"))
+            {
+                ShieldVerificationReport report = ShieldVerification.Verify(new LauncherConfig());
+                string reportPath = GetStringArg(args, "--report");
+                if (string.IsNullOrEmpty(reportPath))
+                {
+                    reportPath = System.IO.Path.Combine(AppPaths.DataDir, "verification.txt");
+                }
+                try
+                {
+                    System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(reportPath));
+                    System.IO.File.WriteAllText(reportPath, report.ToText(), new System.Text.UTF8Encoding(false));
+                }
+                catch
+                {
+                }
+                if (!HasArg(args, "--quiet"))
+                {
+                    ShowInfo("时区 / 语言能力自检", report.ToText(), MessageBoxIcon.Information);
+                }
+                return report.TimeZonePass && report.EnvironmentPass ? 0 : 1;
+            }
+
             bool created;
             _instanceMutex = new Mutex(true, "Global\\PrivacyGuard.UI", out created);
             if (!created)
@@ -135,6 +158,23 @@ namespace PrivacyGuard
                 ShowInfo("PrivacyGuard 无法启动", ex.Message, MessageBoxIcon.Error);
                 return 1;
             }
+        }
+
+        private static string GetStringArg(string[] args, string name)
+        {
+            if (args == null) return null;
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (string.Equals(args[i], name, StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    return args[i + 1];
+                }
+                if (args[i].StartsWith(name + "=", StringComparison.OrdinalIgnoreCase))
+                {
+                    return args[i].Substring(name.Length + 1);
+                }
+            }
+            return null;
         }
 
         private static int GetIntArg(string[] args, string name, int fallback)

@@ -14,6 +14,7 @@ namespace PrivacyGuard
         public const int SecurityImpersonation = 2;
         public const int TokenPrimary = 1;
         public const uint CREATE_UNICODE_ENVIRONMENT = 0x00000400;
+        public const uint CREATE_NO_WINDOW = 0x08000000;
         public const uint LOGON_WITH_PROFILE = 0x00000001;
         public const uint STARTF_USESHOWWINDOW = 0x00000001;
         public const short SW_SHOWNORMAL = 1;

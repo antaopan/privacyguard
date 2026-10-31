@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$version = '1.0.0'
+$version = '1.1.0'
 $distRoot = Join-Path $root 'dist'
 $packageDir = Join-Path $distRoot 'PrivacyGuard'
 $zipPath = Join-Path $distRoot ("PrivacyGuard-{0}-win-x64.zip" -f $version)
@@ -33,7 +33,7 @@ if (Test-Path $packageDir) {
 New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
 
 Copy-Item -Path $exe -Destination $packageDir -Force
-foreach ($name in @('README.md', 'CHANGELOG.md', 'LICENSE', 'install.ps1', 'uninstall.ps1')) {
+foreach ($name in @('README.md', 'VERIFICATION.md', 'CHANGELOG.md', 'LICENSE', 'install.ps1', 'uninstall.ps1')) {
     Copy-Item -Path (Join-Path $root $name) -Destination $packageDir -Force
 }
 
@@ -58,3 +58,4 @@ Write-Host "  压缩包: $zipPath"
 Write-Host "  校验和: $sha"
 Write-Host ''
 Get-Content $sha
+
