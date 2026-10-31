@@ -2,6 +2,13 @@
 
 All notable changes to PrivacyGuard are documented in this file.
 
+## [1.1.1] - 2026-11-01
+
+### Fixed
+
+- 启动器页“运行环境自检”改为更明确的次级按钮样式。
+- 发布包 `SHA256SUMS.txt` 的文件名改为与解压后的 `PrivacyGuard.exe` 一致。
+
 ## [1.1.0] - 2026-11-01
 
 ### Changed
@@ -51,3 +58,4 @@ All notable changes to PrivacyGuard are documented in this file.
 - `TZ` / `LANG` / `--lang` 是兼容模式伪装，不保证所有运行时遵循。
 - 进程监控为轮询式，短命进程可能漏记。
 - 发布包未做商业代码签名。
+

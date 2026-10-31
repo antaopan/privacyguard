@@ -46,7 +46,7 @@
 
 ### 从发布包安装
 
-1. 解压 `PrivacyGuard-1.1.0-win-x64.zip` 到任意目录。
+1. 解压 `PrivacyGuard-1.1.1-win-x64.zip` 到任意目录。
 2. 右键 `install.ps1` → **使用 PowerShell 运行**；或在管理员 PowerShell 中执行：
 
    ```powershell
@@ -250,7 +250,7 @@ dist\PrivacyGuard\install.ps1
 dist\PrivacyGuard\uninstall.ps1
 dist\PrivacyGuard\README.md
 dist\PrivacyGuard\LICENSE
-dist\PrivacyGuard-1.1.0-win-x64.zip
+dist\PrivacyGuard-1.1.1-win-x64.zip
 dist\SHA256SUMS.txt
 ```
 
@@ -363,6 +363,7 @@ Get-Content C:\ProgramData\PrivacyGuard\logs\service-$(Get-Date -Format yyyyMMdd
 ## License
 
 MIT。见 [LICENSE](LICENSE)。
+
 
 
 

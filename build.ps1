@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$version = '1.1.0'
+$version = '1.1.1'
 $distRoot = Join-Path $root 'dist'
 $packageDir = Join-Path $distRoot 'PrivacyGuard'
 $zipPath = Join-Path $distRoot ("PrivacyGuard-{0}-win-x64.zip" -f $version)
@@ -47,7 +47,7 @@ Compress-Archive -Path (Join-Path $packageDir '*') -DestinationPath $zipPath -Co
 
 $sha = Join-Path $distRoot 'SHA256SUMS.txt'
 $lines = @()
-$lines += ((Get-FileHash -Path (Join-Path $packageDir 'PrivacyGuard.exe') -Algorithm SHA256).Hash.ToLowerInvariant() + '  PrivacyGuard/PrivacyGuard.exe')
+$lines += ((Get-FileHash -Path (Join-Path $packageDir 'PrivacyGuard.exe') -Algorithm SHA256).Hash.ToLowerInvariant() + '  PrivacyGuard.exe')
 $lines += ((Get-FileHash -Path $zipPath -Algorithm SHA256).Hash.ToLowerInvariant() + '  ' + (Split-Path $zipPath -Leaf))
 Set-Content -Path $sha -Value $lines -Encoding ASCII
 
@@ -58,4 +58,5 @@ Write-Host "  压缩包: $zipPath"
 Write-Host "  校验和: $sha"
 Write-Host ''
 Get-Content $sha
+
 

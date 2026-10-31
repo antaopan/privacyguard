@@ -10,7 +10,7 @@ namespace PrivacyGuard
     {
         public const string Name = "PrivacyGuard";
         public const string DisplayName = "隐私卫士";
-        public const string Version = "1.1.0";
+        public const string Version = "1.1.1";
         public const string ServiceName = "PrivacyGuard";
         public const string TaskName = "PrivacyGuard";
         public const string FirewallGroup = "PrivacyGuard";
@@ -658,4 +658,5 @@ namespace PrivacyGuard
         }
     }
 }
+
 
